@@ -1,0 +1,31 @@
+# Django
+Django>=4.2,<5.0
+django-cors-headers>=4.3.0
+
+# Gemini AI
+google-generativeai>=0.3.0
+
+# Excel Processing
+pandas>=2.0.0
+openpyxl>=3.1.0
+xlrd>=2.0.0
+
+# Document Processing
+PyPDF2>=3.0.0
+python-docx>=1.0.0
+
+# Web Scraping
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+
+# Google Sheets (Optional)
+google-api-python-client>=2.100.0
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Utilities
+pillow>=10.0.0

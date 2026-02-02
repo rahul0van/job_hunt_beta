@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Setup Google Drive{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Setup Google Drive Integration</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if existing_config %}
+                        <div class="alert alert-info">
+                            <strong>Current Configuration:</strong><br>
+                            Excel File ID: <code>{{ existing_config.excel_file_id }}</code><br>
+                            Output Folder ID: <code>{{ existing_config.output_folder_id }}</code><br>
+                            Status: {% if existing_config.is_monitoring %}<span style="color: #10b981;">● Monitoring</span>{% else %}<span style="color: #ef4444;">○ Stopped</span>{% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="excel_file_id" class="form-label">Excel File ID</label>
+                            <input type="text" class="form-control" id="excel_file_id" name="excel_file_id" required
+                                   placeholder="Enter Google Drive Excel File ID"
+                                   value="{% if existing_config %}{{ existing_config.excel_file_id }}{% endif %}">
+                            <div class="form-text">
+                                Get the file ID from the Google Drive URL: 
+                                <code>https://docs.google.com/spreadsheets/d/[FILE_ID]/edit</code>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="output_folder_id" class="form-label">Output Folder ID</label>
+                            <input type="text" class="form-control" id="output_folder_id" name="output_folder_id" required
+                                   placeholder="Enter Google Drive Folder ID for generated documents"
+                                   value="{% if existing_config %}{{ existing_config.output_folder_id }}{% endif %}">
+                            <div class="form-text">
+                                Get the folder ID from Google Drive URL:
+                                <code>https://drive.google.com/drive/folders/[FOLDER_ID]</code>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="setup_headers" name="setup_headers" checked>
+                            <label class="form-check-label" for="setup_headers">
+                                Set up correct column headers in the Excel file
+                            </label>
+                            <div class="form-text">
+                                This will add/update the following headers: Job URL, Additional Instructions, Generate Resume, 
+                                Generate Cover, Generate New Resume, Resume Generated, Cover Letter Generated, 
+                                Recommendations, Company Name, Google Doc URL
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="start_monitoring" name="start_monitoring">
+                            <label class="form-check-label" for="start_monitoring">
+                                Start monitoring automatically
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Configure Google Drive</button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Setup Instructions:</h5>
+                        <ol class="mb-0">
+                            <li>Create or identify an Excel file in Google Drive with job applications</li>
+                            <li>Create a folder in Google Drive where generated documents will be saved</li>
+                            <li>Copy the file ID from the Excel file URL</li>
+                            <li>Copy the folder ID from the output folder URL</li>
+                            <li>Make sure the service account has access to both the file and folder</li>
+                            <li>Enter the IDs above and click "Configure Google Drive"</li>
+                        </ol>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5>Required Excel Columns</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>The system will automatically set up these columns if you check the option above:</p>
+                            <ul>
+                                <li><strong>Job URL</strong> - Full URL to the job posting (required)</li>
+                                <li><strong>Additional Instructions</strong> - Custom instructions for AI (optional)</li>
+                                <li><strong>Generate Resume</strong> - yes/no (default: yes)</li>
+                                <li><strong>Generate Cover</strong> - yes/no (default: yes)</li>
+                                <li><strong>Generate New Resume</strong> - yes/no (default: yes)</li>
+                                <li><strong>Resume Generated</strong> - Auto-updated by system</li>
+                                <li><strong>Cover Letter Generated</strong> - Auto-updated by system</li>
+                                <li><strong>Recommendations</strong> - Auto-filled with AI recommendations</li>
+                                <li><strong>Company Name</strong> - Auto-extracted from job description</li>
+                                <li><strong>Google Doc URL</strong> - Auto-filled with link to generated doc</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

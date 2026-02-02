@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome to AI Resume & Cover Letter Generator</h2>
+    <p>Automate your job application process with AI-powered resume and cover letter generation.</p>
+</div>
+
+<div class="card">
+    <h2>Current Resume</h2>
+    {% if active_resume %}
+        <p><strong>Name:</strong> {{ active_resume.user_name }}</p>
+        <p><strong>Uploaded:</strong> {{ active_resume.uploaded_at|date:"F d, Y" }}</p>
+        <p><strong>Status:</strong> <span class="badge badge-completed">Active</span></p>
+        <a href="{% url 'resume_generator:upload_resume' %}" class="btn btn-secondary">Upload New Resume</a>
+    {% else %}
+        <p>No resume uploaded yet.</p>
+        <a href="{% url 'resume_generator:upload_resume' %}" class="btn">Upload Resume</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Job Applications</h2>
+    
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'resume_generator:settings' %}" class="btn">Settings</a>
+        <a href="{% url 'resume_generator:monitoring_status' %}" class="btn btn-secondary">Monitoring Status</a>
+        {% if job_applications %}
+            <a href="{% url 'resume_generator:process_jobs' %}" class="btn btn-success">Process Pending Jobs</a>
+        {% endif %}
+    </div>
+    
+    {% if job_applications %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Job URL</th>
+                    <th>Resume</th>
+                    <th>Cover Letter</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in job_applications %}
+                    <tr>
+                        <td>{{ job.id }}</td>
+                        <td>
+                            <a href="{{ job.job_url }}" target="_blank" style="color: #667eea;">
+                                {{ job.job_url|truncatechars:50 }}
+                            </a>
+                        </td>
+                        <td>{{ job.generate_resume|yesno:"Yes,No" }}</td>
+                        <td>{{ job.generate_cover_letter|yesno:"Yes,No" }}</td>
+                        <td>
+                            <span class="badge badge-{{ job.status }}">
+                                {{ job.status|title }}
+                            </span>
+                        </td>
+                        <td>{{ job.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'resume_generator:job_details' job.id %}" class="btn" style="padding: 6px 12px; font-size: 0.9rem;">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No job applications yet. Setup Google Drive to start monitoring for jobs.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Quick Guide</h2>
+    <ol style="padding-left: 25px; line-height: 2;">
+        <li>Upload your resume (PDF, DOCX, or TXT format)</li>
+        <li>Setup Google Drive with your Excel file and output folder</li>
+        <li>System will automatically monitor and process new job applications</li>
+        <li>View generated documents in your Google Drive folder</li>
+    </ol>
+    
+    <h3 style="margin-top: 25px; color: #667eea;">Excel Format:</h3>
+    <p>Your Excel file in Google Drive should have the following columns:</p>
+    <ul style="padding-left: 25px; line-height: 2;">
+        <li><strong>Company Name:</strong> Name of the company (required)</li>
+        <li><strong>Position:</strong> Job position/title (required)</li>
+        <li><strong>Job Description:</strong> Detailed job description (required)</li>
+        <li><strong>Status:</strong> Application status (auto-updated)</li>
+    </ul>
+</div>
+{% endblock %}

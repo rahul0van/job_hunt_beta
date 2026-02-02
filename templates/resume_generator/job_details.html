@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Job Details - {{ job.id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Job Application Details</h2>
+    
+    <div style="margin-top: 20px;">
+        <p><strong>Job URL:</strong> <a href="{{ job.job_url }}" target="_blank" style="color: #667eea;">{{ job.job_url }}</a></p>
+        <p><strong>Status:</strong> <span class="badge badge-{{ job.status }}">{{ job.status|title }}</span></p>
+        <p><strong>Generate Resume:</strong> {{ job.generate_resume|yesno:"Yes,No" }}</p>
+        <p><strong>Generate Cover Letter:</strong> {{ job.generate_cover_letter|yesno:"Yes,No" }}</p>
+        <p><strong>Created:</strong> {{ job.created_at|date:"F d, Y H:i" }}</p>
+        <p><strong>Updated:</strong> {{ job.updated_at|date:"F d, Y H:i" }}</p>
+    </div>
+    
+    {% if job.additional_instructions %}
+        <div style="margin-top: 20px;">
+            <h3 style="color: #667eea;">Additional Instructions:</h3>
+            <p style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                {{ job.additional_instructions }}
+            </p>
+        </div>
+    {% endif %}
+    
+    {% if job.job_description %}
+        <div style="margin-top: 20px;">
+            <h3 style="color: #667eea;">Job Description (Extracted):</h3>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px; max-height: 400px; overflow-y: auto;">
+                <pre style="white-space: pre-wrap; font-family: inherit;">{{ job.job_description|truncatewords:300 }}</pre>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div style="margin-top: 20px;">
+        <a href="{% url 'resume_generator:generate_resume' job.id %}" class="btn">Generate Resume</a>
+        <a href="{% url 'resume_generator:generate_cover_letter' job.id %}" class="btn btn-success">Generate Cover Letter</a>
+        <a href="{% url 'resume_generator:home' %}" class="btn btn-secondary">Back to Home</a>
+    </div>
+</div>
+
+{% if generated_resumes %}
+    <div class="card">
+        <h2>Generated Resumes</h2>
+        {% for resume in generated_resumes %}
+            <div style="border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-top: 15px;">
+                <p><strong>Generated:</strong> {{ resume.created_at|date:"F d, Y H:i" }}</p>
+                
+                {% if resume.recommendations %}
+                    <div style="margin-top: 15px;">
+                        <h4 style="color: #667eea;">AI Recommendations:</h4>
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                            <pre style="white-space: pre-wrap; font-family: inherit;">{{ resume.recommendations }}</pre>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div style="margin-top: 15px;">
+                    <h4 style="color: #667eea;">Resume Content:</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px; max-height: 400px; overflow-y: auto;">
+                        <pre style="white-space: pre-wrap; font-family: inherit;">{{ resume.content }}</pre>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <a href="{% url 'resume_generator:download_resume' resume.id %}" class="btn">Download Resume</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if generated_covers %}
+    <div class="card">
+        <h2>Generated Cover Letters</h2>
+        {% for cover in generated_covers %}
+            <div style="border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-top: 15px;">
+                <p><strong>Generated:</strong> {{ cover.created_at|date:"F d, Y H:i" }}</p>
+                
+                <div style="margin-top: 15px;">
+                    <h4 style="color: #667eea;">Cover Letter Content:</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px; max-height: 400px; overflow-y: auto;">
+                        <pre style="white-space: pre-wrap; font-family: inherit;">{{ cover.content }}</pre>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <a href="{% url 'resume_generator:download_cover' cover.id %}" class="btn">Download Cover Letter</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

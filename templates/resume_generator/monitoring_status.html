@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Google Drive Monitoring Status{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>📊 Google Drive Monitoring Status</h2>
+    <p>View and control continuous monitoring of Google Drive Excel files for automatic resume/cover letter generation.</p>
+    
+    {% if configs %}
+        <table style="margin-top: 30px;">
+            <thead>
+                <tr>
+                    <th>Excel File ID</th>
+                    <th>Output Folder</th>
+                    <th>Status</th>
+                    <th>Last Checked</th>
+                    <th>Last Modified</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for config in configs %}
+                <tr>
+                    <td style="max-width: 200px; word-wrap: break-word;">
+                        <a href="https://docs.google.com/spreadsheets/d/{{ config.excel_file_id }}" target="_blank" style="color: #667eea;">
+                            {{ config.excel_file_id|truncatechars:30 }}
+                        </a>
+                    </td>
+                    <td style="max-width: 200px; word-wrap: break-word;">
+                        <a href="https://drive.google.com/drive/folders/{{ config.output_folder_id }}" target="_blank" style="color: #667eea;">
+                            {{ config.output_folder_id|truncatechars:30 }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if config.is_monitoring %}
+                            <span style="color: #10b981; font-weight: bold;">● Monitoring</span>
+                        {% else %}
+                            <span style="color: #ef4444;">○ Stopped</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if config.last_checked %}
+                            {{ config.last_checked|date:"Y-m-d H:i:s" }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if config.last_modified %}
+                            {{ config.last_modified|date:"Y-m-d H:i:s" }}
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if config.is_monitoring %}
+                            <a href="{% url 'resume_generator:stop_monitoring' config.id %}" 
+                               class="btn btn-small" 
+                               style="background: #ef4444;"
+                               onclick="return confirm('Stop monitoring this file?')">
+                                Stop
+                            </a>
+                        {% else %}
+                            <a href="{% url 'resume_generator:start_monitoring' config.id %}" 
+                               class="btn btn-small" 
+                               style="background: #10b981;">
+                                Start
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'resume_generator:process_drive_now' config.id %}" 
+                           class="btn btn-small" 
+                           style="background: #3b82f6;">
+                            Process Now
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <p>No Google Drive files are being monitored.</p>
+            <p>Setup Google Drive integration to get started.</p>
+        </div>
+    {% endif %}
+    
+    <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+        <h3 style="margin-top: 0;">ℹ️ How Monitoring Works</h3>
+        <ul style="line-height: 1.8;">
+            <li><strong>Continuous Monitoring:</strong> When enabled, the system periodically checks the Google Drive Excel file for new or unprocessed jobs.</li>
+            <li><strong>Automatic Processing:</strong> For each job with "Status" set to "pending" or empty, the system will generate a resume and cover letter.</li>
+            <li><strong>Status Updates:</strong> The Excel file is automatically updated with "completed" or "failed" status after processing.</li>
+            <li><strong>Combined Documents:</strong> Resume and cover letter are created in the same Google Doc with the company name as the title.</li>
+            <li><strong>Manual Processing:</strong> Use "Process Now" to immediately process all pending jobs in a file.</li>
+        </ul>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <a href="{% url 'resume_generator:settings' %}" class="btn">Settings</a>
+        <a href="{% url 'resume_generator:home' %}" class="btn btn-secondary">Back to Home</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>🤖 Running Background Monitor</h2>
+    <p>For continuous monitoring in the background, run the following command in your terminal:</p>
+    
+    <pre style="background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: 8px; overflow-x: auto; margin-top: 15px;">
+# Monitor all active Excel files (checks every 60 seconds)
+python manage.py monitor_excel
+
+# Monitor a specific file
+python manage.py monitor_excel --file /path/to/your/file.xlsx
+
+# Custom check interval (in seconds)
+python manage.py monitor_excel --interval 30
+    </pre>
+    
+    <p style="margin-top: 15px; color: #666;">
+        <strong>Note:</strong> The command will run continuously until you press Ctrl+C. 
+        For production, consider using a process manager like <code>supervisor</code> or running it as a system service.
+    </p>
+</div>
+{% endblock %}

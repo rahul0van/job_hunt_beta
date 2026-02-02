@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Resume{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Upload Your Resume</h2>
+    <p>Upload your current resume. The AI will use this as a base to create customized versions for each job application.</p>
+    
+    <form method="post" enctype="multipart/form-data" style="margin-top: 30px;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="user_name">Your Name</label>
+            <input type="text" id="user_name" name="user_name" placeholder="Enter your name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="resume_file">Resume File</label>
+            <input type="file" id="resume_file" name="resume_file" accept=".pdf,.docx,.txt" required>
+            <small style="color: #666; display: block; margin-top: 5px;">
+                Supported formats: PDF, DOCX, TXT (Max 10MB)
+            </small>
+        </div>
+        
+        <button type="submit" class="btn">Upload Resume</button>
+        <a href="{% url 'resume_generator:home' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Tips for Best Results</h2>
+    <ul style="padding-left: 25px; line-height: 2;">
+        <li>Use a well-formatted resume with clear sections</li>
+        <li>Include all your relevant experience, skills, and education</li>
+        <li>PDF format typically preserves formatting best</li>
+        <li>Ensure text is selectable (not scanned images)</li>
+    </ul>
+</div>
+{% endblock %}

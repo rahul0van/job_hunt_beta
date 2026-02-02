@@ -66,8 +66,8 @@ class JobApplication(models.Model):
         ('failed', 'Failed'),
     ]
     
-    job_url = models.URLField(max_length=1000, help_text='URL of the job description')
-    job_description = models.TextField(blank=True, help_text='Extracted job description')
+    job_url = models.URLField(max_length=1000, blank=True, help_text='URL of the job description (optional if job_description is provided)')
+    job_description = models.TextField(blank=True, help_text='Job description text (required if job_url is empty)')
     company_name = models.CharField(max_length=500, blank=True, help_text='Extracted company name')
     additional_instructions = models.TextField(
         blank=True,
@@ -99,7 +99,12 @@ class JobApplication(models.Model):
         verbose_name_plural = 'Job Applications'
     
     def __str__(self):
-        return f"Job Application - {self.job_url[:50]}... ({self.status})"
+        if self.job_url:
+            return f"Job Application - {self.job_url[:50]}... ({self.status})"
+        elif self.job_description:
+            return f"Job Application - {self.job_description[:50]}... ({self.status})"
+        else:
+            return f"Job Application #{self.id} ({self.status})"
 
 
 class GeneratedResume(models.Model):
@@ -126,7 +131,8 @@ class GeneratedResume(models.Model):
         verbose_name_plural = 'Generated Resumes'
     
     def __str__(self):
-        return f"Resume for {self.job_application.job_url[:30]}... ({self.created_at.strftime('%Y-%m-%d')})"
+        job_info = self.job_application.job_url[:30] if self.job_application.job_url else f"Job #{self.job_application.id}"
+        return f"Resume for {job_info}... ({self.created_at.strftime('%Y-%m-%d')})"
 
 
 class GeneratedCoverLetter(models.Model):
@@ -148,4 +154,5 @@ class GeneratedCoverLetter(models.Model):
         verbose_name_plural = 'Generated Cover Letters'
     
     def __str__(self):
-        return f"Cover Letter for {self.job_application.job_url[:30]}... ({self.created_at.strftime('%Y-%m-%d')})"
+        job_info = self.job_application.job_url[:30] if self.job_application.job_url else f"Job #{self.job_application.id}"
+        return f"Cover Letter for {job_info}... ({self.created_at.strftime('%Y-%m-%d')})"

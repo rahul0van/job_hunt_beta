@@ -89,13 +89,16 @@ cover_resume_ai/
 ### 3. Setup Google Sheet
 
 Create a Google Sheet with these columns:
-- `job_url` - Job posting URL (required)
+- `job_url` - Job posting URL (optional if job_description is provided)
+- `job_description` - Full job description text (optional if job_url is provided)
 - `additional_instructions` - Special instructions for AI (optional)
 - `company_name` - Company name (auto-filled)
 - `resume_generated` - Status (auto-filled: yes/no)
 - `cover_letter_generated` - Status (auto-filled: yes/no)
 - `google_doc_url` - Link to generated doc (auto-filled)
 - `recommendations` - AI suggestions (auto-filled)
+
+**Note:** You must provide either `job_url` OR `job_description`. If `job_url` is empty, the system will use the `job_description` column.
 
 ### 4. Start Continuous Monitoring
 
@@ -111,13 +114,15 @@ This will continuously check your Google Sheet every 60 seconds for changes.
 
 ### 5. How It Works
 
-1. **Add job URLs** to your Google Sheet
+1. **Add job information** to your Google Sheet (job URL or job description)
 2. **System automatically detects** new/changed rows
 3. **Generates** resume + cover letter using AI
 4. **Saves** combined document to Google Drive
 5. **Updates** Google Sheet with status and document link
 6. **You can**:
    - Add new rows anytime
+   - Use job URLs for automatic scraping
+   - Paste job descriptions directly if URL is unavailable
    - Remove old rows
    - Update URLs
    - Change instructions

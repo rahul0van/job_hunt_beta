@@ -7,7 +7,11 @@
     <h2>Job Application Details</h2>
     
     <div style="margin-top: 20px;">
-        <p><strong>Job URL:</strong> <a href="{{ job.job_url }}" target="_blank" style="color: #667eea;">{{ job.job_url }}</a></p>
+        {% if job.job_url %}
+            <p><strong>Job URL:</strong> <a href="{{ job.job_url }}" target="_blank" style="color: #667eea;">{{ job.job_url }}</a></p>
+        {% else %}
+            <p><strong>Job URL:</strong> <em>Not provided (using Job Description)</em></p>
+        {% endif %}
         <p><strong>Status:</strong> <span class="badge badge-{{ job.status }}">{{ job.status|title }}</span></p>
         <p><strong>Generate Resume:</strong> {{ job.generate_resume|yesno:"Yes,No" }}</p>
         <p><strong>Generate Cover Letter:</strong> {{ job.generate_cover_letter|yesno:"Yes,No" }}</p>
@@ -26,7 +30,7 @@
     
     {% if job.job_description %}
         <div style="margin-top: 20px;">
-            <h3 style="color: #667eea;">Job Description (Extracted):</h3>
+            <h3 style="color: #667eea;">Job Description:</h3>
             <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px; max-height: 400px; overflow-y: auto;">
                 <pre style="white-space: pre-wrap; font-family: inherit;">{{ job.job_description|truncatewords:300 }}</pre>
             </div>

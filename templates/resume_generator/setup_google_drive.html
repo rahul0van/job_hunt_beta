@@ -60,7 +60,7 @@
                                 Set up correct column headers in the Excel file
                             </label>
                             <div class="form-text">
-                                This will add/update the following headers: Job URL, Additional Instructions, Generate Resume, 
+                                This will add/update the following headers: Job URL, Job Description, Additional Instructions, Generate Resume, 
                                 Generate Cover, Generate New Resume, Resume Generated, Cover Letter Generated, 
                                 Recommendations, Company Name, Google Doc URL
                             </div>
@@ -99,7 +99,9 @@
                         <div class="card-body">
                             <p>The system will automatically set up these columns if you check the option above:</p>
                             <ul>
-                                <li><strong>Job URL</strong> - Full URL to the job posting (required)</li>
+                                <li><strong>Job URL</strong> - Full URL to the job posting (optional if Job Description is provided)</li>
+                                <li><strong>Job Description</strong> - Paste the full job description here (optional if Job URL is provided)</li>
+                                <li><em>Note: At least one of Job URL or Job Description must be provided</em></li>
                                 <li><strong>Additional Instructions</strong> - Custom instructions for AI (optional)</li>
                                 <li><strong>Generate Resume</strong> - yes/no (default: yes)</li>
                                 <li><strong>Generate Cover</strong> - yes/no (default: yes)</li>

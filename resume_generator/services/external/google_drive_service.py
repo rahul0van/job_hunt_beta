@@ -78,11 +78,15 @@ class GoogleDriveService:
             # Normalize column names
             df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
             
-            # Required column
-            if 'job_url' not in df.columns:
-                raise ValueError("Excel file must contain 'job_url' column")
+            # At least one of job_url or job_description must be present
+            if 'job_url' not in df.columns and 'job_description' not in df.columns:
+                raise ValueError("Excel file must contain either 'job_url' or 'job_description' column")
             
             # Fill missing columns with defaults
+            if 'job_url' not in df.columns:
+                df['job_url'] = ''
+            if 'job_description' not in df.columns:
+                df['job_description'] = ''
             if 'additional_instructions' not in df.columns:
                 df['additional_instructions'] = ''
             if 'generate_resume' not in df.columns:
@@ -105,11 +109,16 @@ class GoogleDriveService:
             # Convert to list of dictionaries
             job_applications = []
             for idx, row in df.iterrows():
-                if pd.isna(row['job_url']) or not row['job_url']:
+                # Skip if both job_url and job_description are empty
+                job_url = str(row['job_url']).strip() if not pd.isna(row['job_url']) else ''
+                job_desc = str(row['job_description']).strip() if not pd.isna(row['job_description']) else ''
+                
+                if not job_url and not job_desc:
                     continue
                 
                 job_app = {
-                    'job_url': str(row['job_url']).strip(),
+                    'job_url': job_url,
+                    'job_description': job_desc,
                     'additional_instructions': str(row['additional_instructions']) if not pd.isna(row['additional_instructions']) else '',
                     'generate_resume': str(row['generate_resume']).lower() in ['yes', 'true', '1', 'y'],
                     'generate_cover_letter': str(row['generate_cover']).lower() in ['yes', 'true', '1', 'y'],
@@ -486,6 +495,7 @@ class GoogleDriveService:
             # Define correct headers
             correct_headers = [
                 'Job URL',
+                'Job Description',
                 'Additional Instructions',
                 'Generate Resume',
                 'Generate Cover',

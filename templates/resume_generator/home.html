@@ -35,7 +35,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Job URL</th>
+                    <th>Job Info</th>
                     <th>Resume</th>
                     <th>Cover Letter</th>
                     <th>Status</th>
@@ -48,9 +48,15 @@
                     <tr>
                         <td>{{ job.id }}</td>
                         <td>
-                            <a href="{{ job.job_url }}" target="_blank" style="color: #667eea;">
-                                {{ job.job_url|truncatechars:50 }}
-                            </a>
+                            {% if job.job_url %}
+                                <a href="{{ job.job_url }}" target="_blank" style="color: #667eea;">
+                                    {{ job.job_url|truncatechars:50 }}
+                                </a>
+                            {% else %}
+                                <span style="color: #666; font-style: italic;">
+                                    Job Description: {{ job.job_description|truncatechars:50 }}
+                                </span>
+                            {% endif %}
                         </td>
                         <td>{{ job.generate_resume|yesno:"Yes,No" }}</td>
                         <td>{{ job.generate_cover_letter|yesno:"Yes,No" }}</td>

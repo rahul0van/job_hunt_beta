@@ -134,12 +134,16 @@ class AIResumeGeneratorService:
         try:
             # Extract job description if not already available
             if not job_application.job_description:
-                job_description = self.job_scraper.extract_job_description(
-                    job_application.job_url
-                )
-                JobApplicationRepository.update_job_description(
-                    job_application.id, job_description
-                )
+                # Only try to scrape if job_url is provided
+                if job_application.job_url:
+                    job_description = self.job_scraper.extract_job_description(
+                        job_application.job_url
+                    )
+                    JobApplicationRepository.update_job_description(
+                        job_application.id, job_description
+                    )
+                else:
+                    job_description = "No job description or URL provided. Using additional instructions only."
             else:
                 job_description = job_application.job_description
             
@@ -204,12 +208,16 @@ Provide actionable, specific recommendations.
         try:
             # Extract job description if not already available
             if not job_application.job_description:
-                job_description = self.job_scraper.extract_job_description(
-                    job_application.job_url
-                )
-                JobApplicationRepository.update_job_description(
-                    job_application.id, job_description
-                )
+                # Only try to scrape if job_url is provided
+                if job_application.job_url:
+                    job_description = self.job_scraper.extract_job_description(
+                        job_application.job_url
+                    )
+                    JobApplicationRepository.update_job_description(
+                        job_application.id, job_description
+                    )
+                else:
+                    job_description = "No job description or URL provided. Using additional instructions only."
             else:
                 job_description = job_application.job_description
             

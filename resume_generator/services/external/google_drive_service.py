@@ -83,6 +83,8 @@ class GoogleDriveService:
                 raise ValueError("Excel file must contain either 'job_url' or 'job_description' column")
             
             # Fill missing columns with defaults
+            if 'unique_id' not in df.columns:
+                df['unique_id'] = ''
             if 'job_url' not in df.columns:
                 df['job_url'] = ''
             if 'job_description' not in df.columns:
@@ -117,6 +119,7 @@ class GoogleDriveService:
                     continue
                 
                 job_app = {
+                    'unique_id': str(row['unique_id']) if not pd.isna(row['unique_id']) and str(row['unique_id']).strip() else '',
                     'job_url': job_url,
                     'job_description': job_desc,
                     'additional_instructions': str(row['additional_instructions']) if not pd.isna(row['additional_instructions']) else '',
@@ -136,6 +139,7 @@ class GoogleDriveService:
             raise Exception(f"Error reading Excel from Google Drive: {str(e)}")
     
     def update_excel_in_drive(self, file_id: str, row_index: int,
+                             unique_id: str = None,
                              resume_generated: bool = None,
                              cover_letter_generated: bool = None,
                              recommendations: str = None,
@@ -147,6 +151,7 @@ class GoogleDriveService:
         Args:
             file_id: Google Drive file ID
             row_index: Excel row number (1-indexed, including header)
+            unique_id: Unique identifier for the row
             resume_generated: Whether resume was generated
             cover_letter_generated: Whether cover letter was generated
             recommendations: AI recommendations text
@@ -179,6 +184,11 @@ class GoogleDriveService:
             df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
             
             # Add columns if they don't exist and ensure they're object type (string)
+            if 'unique_id' not in df.columns:
+                df['unique_id'] = ''
+            else:
+                df['unique_id'] = df['unique_id'].astype(str).replace('nan', '')
+            
             if 'resume_generated' not in df.columns:
                 df['resume_generated'] = 'no'
             else:
@@ -210,6 +220,8 @@ class GoogleDriveService:
             if df_index < 0 or df_index >= len(df):
                 raise ValueError(f"Invalid row index: {row_index}")
             
+            if unique_id is not None:
+                df.at[df_index, 'unique_id'] = unique_id
             if resume_generated is not None:
                 df.at[df_index, 'resume_generated'] = 'yes' if resume_generated else 'no'
             if cover_letter_generated is not None:
@@ -494,6 +506,7 @@ class GoogleDriveService:
             
             # Define correct headers
             correct_headers = [
+                'Unique ID',
                 'Job URL',
                 'Job Description',
                 'Additional Instructions',

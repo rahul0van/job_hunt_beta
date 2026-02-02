@@ -8,6 +8,7 @@ from django.utils import timezone
 from ..models import GoogleDriveConfig, JobApplication, UserResume
 from .external.google_drive_service import GoogleDriveService
 from .resume_service import AIResumeGeneratorService, JobScraperService
+from .excel_sync_service import ExcelSyncService
 from ..repositories import (
     JobApplicationRepository, 
     GeneratedResumeRepository,
@@ -23,6 +24,7 @@ class GoogleDriveMonitorService:
         self.ai_service = AIResumeGeneratorService()
         self.job_scraper = JobScraperService()
         self.drive_service = GoogleDriveService()
+        self.sync_service = ExcelSyncService()
     
     def start_monitoring(self, excel_file_id: str, output_folder_id: str) -> Dict:
         """
@@ -111,6 +113,22 @@ class GoogleDriveMonitorService:
             # Read Excel from Drive
             job_apps_data = self.drive_service.read_excel_from_drive(config.excel_file_id)
             
+            # Sync Excel data with local JSON cache
+            sync_result = self.sync_service.sync_excel_data(job_apps_data)
+            job_apps_data = sync_result['jobs']  # Get jobs with generated unique_ids
+            
+            # Update Excel with new unique_ids
+            for job_data in job_apps_data:
+                if job_data.get('unique_id') and job_data.get('excel_row_index'):
+                    try:
+                        self.drive_service.update_excel_in_drive(
+                            config.excel_file_id,
+                            job_data['excel_row_index'],
+                            unique_id=job_data['unique_id']
+                        )
+                    except Exception as e:
+                        print(f"Warning: Could not update unique_id in Excel: {e}")
+            
             # Get active resume
             active_resume = UserResumeRepository.get_active_resume()
             if not active_resume:
@@ -141,15 +159,18 @@ class GoogleDriveMonitorService:
                         skipped_count += 1
                         continue
                     
-                    # Find or create job application
-                    job_app = JobApplication.objects.filter(
-                        job_url=job_data['job_url'],
-                        user_resume=active_resume
-                    ).first()
+                    # Find or create job application using unique_id
+                    unique_id = job_data.get('unique_id', '')
+                    job_app = None
+                    
+                    if unique_id:
+                        job_app = JobApplication.objects.filter(unique_id=unique_id).first()
                     
                     if not job_app:
                         job_app = JobApplicationRepository.create(
-                            job_url=job_data['job_url'],
+                            unique_id=unique_id,
+                            job_url=job_data.get('job_url', ''),
+                            job_description=job_data.get('job_description', ''),
                             additional_instructions=job_data.get('additional_instructions', ''),
                             generate_resume=should_gen_resume,
                             generate_cover_letter=should_gen_cover,
@@ -162,6 +183,8 @@ class GoogleDriveMonitorService:
                         )
                     else:
                         # Update from sheet data
+                        job_app.job_url = job_data.get('job_url', '')
+                        job_app.job_description = job_data.get('job_description', '')
                         job_app.generate_resume = should_gen_resume
                         job_app.generate_cover_letter = should_gen_cover
                         job_app.additional_instructions = job_data.get('additional_instructions', '')
@@ -182,7 +205,7 @@ class GoogleDriveMonitorService:
                         error_count += 1
                 
                 except Exception as e:
-                    print(f"Error processing job {job_data.get('job_url')}: {str(e)}")
+                    print(f"Error processing job {job_data.get('job_url') or job_data.get('unique_id')}: {str(e)}")
                     error_count += 1
             
             # Update config
@@ -195,7 +218,9 @@ class GoogleDriveMonitorService:
                 'processed': processed_count,
                 'skipped': skipped_count,
                 'errors': error_count,
-                'total': len(job_apps_data)
+                'total': len(job_apps_data),
+                'sync_stats': sync_result['stats'],
+                'cache_file': sync_result['cache_file']
             }
         
         except Exception as e:

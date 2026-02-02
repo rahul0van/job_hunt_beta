@@ -66,6 +66,7 @@ class JobApplication(models.Model):
         ('failed', 'Failed'),
     ]
     
+    unique_id = models.CharField(max_length=100, unique=True, blank=True, help_text='Unique identifier for Excel row sync')
     job_url = models.URLField(max_length=1000, blank=True, help_text='URL of the job description (optional if job_description is provided)')
     job_description = models.TextField(blank=True, help_text='Job description text (required if job_url is empty)')
     company_name = models.CharField(max_length=500, blank=True, help_text='Extracted company name')

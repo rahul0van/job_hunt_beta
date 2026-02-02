@@ -55,13 +55,14 @@ class JobApplicationRepository:
     """Repository for JobApplication model"""
     
     @staticmethod
-    def create(job_url: str = '', job_description: str = '', additional_instructions: str = '',
+    def create(unique_id: str = '', job_url: str = '', job_description: str = '', additional_instructions: str = '',
                generate_resume: bool = True, generate_cover_letter: bool = True,
                generate_new_resume: bool = True, resume_generated: bool = False,
                cover_letter_generated: bool = False, excel_row_index: int = None,
                company_name: str = '', user_resume: Optional[UserResume] = None) -> JobApplication:
         """Create a new job application"""
         return JobApplication.objects.create(
+            unique_id=unique_id,
             job_url=job_url,
             job_description=job_description,
             additional_instructions=additional_instructions,

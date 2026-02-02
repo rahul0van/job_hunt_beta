@@ -208,6 +208,11 @@ class GoogleDriveMonitorService:
                     print(f"Error processing job {job_data.get('job_url') or job_data.get('unique_id')}: {str(e)}")
                     error_count += 1
             
+            # Cleanup old jobs if enabled
+            archived_count = 0
+            if config.auto_cleanup_old_jobs:
+                archived_count = self._cleanup_old_jobs(job_apps_data, active_resume)
+            
             # Update config
             config.last_checked = timezone.now()
             config.last_modified = timezone.now()
@@ -218,6 +223,7 @@ class GoogleDriveMonitorService:
                 'processed': processed_count,
                 'skipped': skipped_count,
                 'errors': error_count,
+                'archived': archived_count,
                 'total': len(job_apps_data),
                 'sync_stats': sync_result['stats'],
                 'cache_file': sync_result['cache_file']
@@ -225,6 +231,44 @@ class GoogleDriveMonitorService:
         
         except Exception as e:
             return {'success': False, 'error': str(e)}
+    
+    def _cleanup_old_jobs(self, excel_jobs: list, user_resume: UserResume) -> int:
+        """
+        Archive jobs that are no longer in Excel
+        
+        Args:
+            excel_jobs: List of job dictionaries from Excel
+            user_resume: Current active user resume
+        
+        Returns:
+            Number of jobs archived
+        """
+        try:
+            # Get unique IDs from Excel
+            excel_unique_ids = {job.get('unique_id') for job in excel_jobs if job.get('unique_id')}
+            
+            # Find jobs in database that are not in Excel
+            # Only archive jobs with unique_id (new sync system)
+            all_jobs = JobApplication.objects.filter(
+                user_resume=user_resume,
+                unique_id__isnull=False
+            ).exclude(unique_id='')
+            
+            archived_count = 0
+            for job in all_jobs:
+                if job.unique_id not in excel_unique_ids:
+                    # Mark as completed/archived instead of deleting
+                    if job.status != 'completed':
+                        job.status = 'completed'
+                        job.save()
+                        archived_count += 1
+                        print(f"Archived job: {job.unique_id} - {job.job_url or 'No URL'}")
+            
+            return archived_count
+        
+        except Exception as e:
+            print(f"Error during cleanup: {str(e)}")
+            return 0
     
     def _process_single_job(self, job_app: JobApplication, resume_content: str,
                            config: GoogleDriveConfig, force_reprocess: bool = False) -> Dict:

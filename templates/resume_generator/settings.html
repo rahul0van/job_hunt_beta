@@ -235,6 +235,22 @@
                     </span>
                 </label>
             </div>
+            
+            <div class="checkbox-group">
+                <input 
+                    type="checkbox" 
+                    id="auto_cleanup_old_jobs" 
+                    name="auto_cleanup_old_jobs"
+                    {% if config.auto_cleanup_old_jobs %}checked{% endif %}
+                >
+                <label for="auto_cleanup_old_jobs" class="checkbox-label">
+                    <span class="title">🗑️ Auto Cleanup Old Jobs</span>
+                    <span class="description">
+                        Automatically archive jobs that are no longer in your Excel file during sync.
+                        Jobs are marked as "completed" but not deleted, preserving your history.
+                    </span>
+                </label>
+            </div>
         </div>
         
         <button type="submit" class="btn-save">💾 Save Settings</button>

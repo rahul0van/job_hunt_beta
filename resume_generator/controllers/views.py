@@ -84,6 +84,7 @@ def settings(request):
         generate_new_resume = request.POST.get('generate_new_resume') == 'on'
         generate_recommendations = request.POST.get('generate_recommendations') == 'on'
         always_generate_cover_letter = request.POST.get('always_generate_cover_letter') == 'on'
+        auto_cleanup_old_jobs = request.POST.get('auto_cleanup_old_jobs') == 'on'
         
         if not excel_file_id or not output_folder_id:
             messages.error(request, 'Please provide both Excel file ID and output folder ID')
@@ -103,6 +104,7 @@ def settings(request):
                 config.generate_new_resume = generate_new_resume
                 config.generate_recommendations = generate_recommendations
                 config.always_generate_cover_letter = always_generate_cover_letter
+                config.auto_cleanup_old_jobs = auto_cleanup_old_jobs
                 config.save()
             else:
                 monitor_service = GoogleDriveMonitorService()
@@ -113,6 +115,7 @@ def settings(request):
                     config.generate_new_resume = generate_new_resume
                     config.generate_recommendations = generate_recommendations
                     config.always_generate_cover_letter = always_generate_cover_letter
+                    config.auto_cleanup_old_jobs = auto_cleanup_old_jobs
                     config.save()
                     messages.success(request, 'Settings saved successfully!')
                     return redirect('resume_generator:monitoring_status')

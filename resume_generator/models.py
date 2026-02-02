@@ -24,6 +24,10 @@ class GoogleDriveConfig(models.Model):
         default=True,
         help_text="Always generate cover letter regardless of resume setting"
     )
+    auto_cleanup_old_jobs = models.BooleanField(
+        default=False,
+        help_text="Automatically archive jobs not found in Excel during sync"
+    )
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
